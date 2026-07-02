@@ -1,7 +1,7 @@
 # GitHub Issue #2: Review template repo and align it with fleet conventions
 
 **Issue:** [#2](https://github.com/denhamparry/template/issues/2)
-**Status:** Planning
+**Status:** Reviewed (Approved)
 **Date:** 2026-07-02
 
 ## Problem Statement
@@ -163,6 +163,10 @@ the `check-yaml` hook.
 - PR runs: offline internal-link check on `**/*.md`; weekly Monday 10:00
   UTC: full external check that opens an issue on failure. Uses
   `lycheeverse/lychee-action@8646ba3…v2.8.0`.
+- Add `.lycheeignore` (new) excluding template placeholder URLs
+  (`github.com/YOUR_USERNAME/`, `github.com/your-username/`,
+  `github.com/[OWNER]/`) so the weekly external check doesn't open noise
+  issues on unmodified templates (review finding).
 
 ### Step 5: Add OpenSSF Scorecard workflow
 
@@ -358,6 +362,7 @@ pre-commit hooks (check-yaml, markdownlint, prettier, gitleaks).
 20. `docs/progress.md` - Deleted (template-development artifact)
 21. `CLAUDE.md` - Contents list + footer refresh
 22. `README.md` - Feature overview refresh
+23. `.lycheeignore` - New: exclude template placeholder URLs (review finding)
 
 ## Related Issues and Tasks
 
@@ -411,3 +416,117 @@ pre-commit hooks (check-yaml, markdownlint, prettier, gitleaks).
 - Keep the template's pinned SHAs fresh via Dependabot (already configured
   for `github-actions`).
 - When the fleet convention changes, update the template in the same sweep.
+
+## Plan Review
+
+**Reviewer:** Claude Code (workflow-research-plan)
+**Review Date:** 2026-07-02
+**Original Plan Date:** 2026-07-02
+
+### Review Summary
+
+- **Overall Assessment:** Approved
+- **Confidence Level:** High
+- **Recommendation:** Proceed to implementation (required changes are folded
+  into the plan above and must be honoured during implementation)
+
+### Strengths
+
+- Ports battle-tested workflow files from `denhamparry/claude` rather than
+  reinventing them, so pinned SHAs and structure stay aligned with the
+  fleet by construction.
+- Correctly identifies `runs-on` as the only intentional fleet variance and
+  defaults the template to `ubuntu-latest` (verified: the four repos using
+  `[self-hosted, bear]` differ from the fleet file by exactly that line).
+- Scope matches issue #2 one-to-one: every checkbox in the issue maps to a
+  numbered implementation step; nothing extra is smuggled in.
+- Deletion safety verified: `docs/plan.md` and `docs/progress.md` are not
+  referenced by any other markdown file.
+
+### Gaps Identified
+
+1. **Gap 1:** Placeholder URLs break the weekly external link check.
+   `README.md` and `CONTRIBUTING.md` contain deliberate placeholder links
+   (`github.com/YOUR_USERNAME/REPO_NAME.git`,
+   `github.com/your-username/your-new-project.git`) that will 404, so the
+   scheduled lychee run would open a noise issue on every unmodified
+   template clone.
+   - **Impact:** Medium
+   - **Recommendation:** Add `.lycheeignore` with placeholder patterns —
+     folded into Step 4 and Files Modified (item 23).
+2. **Gap 2:** `claude-code-review.yml` is referenced in `CLAUDE.md` (3
+   places), `README.md`, and `docs/setup.md`. Adding `claude.yml` without
+   updating those references would leave the docs presenting auto-review as
+   the primary path, contradicting the fleet convention.
+   - **Impact:** Medium
+   - **Recommendation:** Steps 12 and 15 must explicitly reposition
+     mention-based `@claude` review as primary and auto-review config as
+     optional.
+
+### Edge Cases Not Covered
+
+1. **Edge Case 1:** Windows checkouts of the `AGENTS.md` symlink require
+   Developer Mode or `core.symlinks=true`.
+   - **Current Plan:** Not mentioned.
+   - **Recommendation:** Acceptable residual risk for this fleet (macOS /
+     Linux); no change required. Note only.
+2. **Edge Case 2:** Autoupdate PRs created with the default `GITHUB_TOKEN`
+   won't trigger the pre-commit check (GitHub anti-recursion).
+   - **Current Plan:** Covered — the ported file's header documents the
+     close/reopen workaround and PAT alternative.
+
+### Alternatives Assessed During Review
+
+1. **Central reusable workflows (`workflow_call`)**
+   - **Pros:** Single point of update for the whole fleet.
+   - **Cons:** Cross-repo coupling; fleet doesn't use it yet; template users
+     outside the fleet would depend on `denhamparry` repos.
+   - **Verdict:** Plan's copy-with-adaptation approach is right for now;
+     revisit as a follow-up idea.
+
+### Risks and Concerns
+
+1. **Risk 1:** Hooks that rewrite files (`end-of-file-fixer`,
+   `trailing-whitespace`) follow symlinks and could materialise `AGENTS.md`
+   as a regular file if `CLAUDE.md` ever fails those hooks.
+   - **Likelihood:** Low (CLAUDE.md already passes; same pattern works in
+     the `claude` repo with more aggressive hooks)
+   - **Impact:** Low
+   - **Mitigation:** None needed now; verify symlink intact in Test Case 3.
+2. **Risk 2:** `scorecard.yml` fails on private template clones.
+   - **Likelihood:** High for private clones
+   - **Impact:** Low (non-required check)
+   - **Mitigation:** Header comment + setup wizard step to delete it
+     (Steps 5 and 13).
+
+### Required Changes
+
+**Changes that must be made before implementation:**
+
+- [x] Add `.lycheeignore` for placeholder URLs (folded into Step 4 / Files
+      Modified item 23)
+- [x] Update all `claude-code-review.yml` references in `CLAUDE.md`,
+      `README.md`, and `docs/setup.md` to present mention-based review as
+      primary (clarified in Steps 12 and 15)
+
+### Optional Improvements
+
+- [ ] After merge, apply the documented branch protection to this template
+      repo itself (out-of-band `gh api` call)
+- [ ] Consider a `nix.yml` advisory flake check if `flake.nix` sees real use
+
+### Verification Checklist
+
+- [x] Solution addresses root cause identified in GitHub issue
+- [x] All acceptance criteria from issue are covered
+- [x] Implementation steps are specific and actionable
+- [x] File paths and code references are accurate (verified against the
+      worktree and `denhamparry/claude` fetched files)
+- [x] Security implications considered and addressed (pinned SHAs, minimal
+      permissions, gitleaks fetch-depth)
+- [x] Performance impact assessed (concurrency cancellation on all new
+      workflows)
+- [x] Test strategy covers critical paths and edge cases
+- [x] Documentation updates planned
+- [x] Related issues/dependencies identified
+- [x] Breaking changes documented (issue template `.md` → `.yml` swap)
