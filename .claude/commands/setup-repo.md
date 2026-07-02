@@ -85,7 +85,11 @@ Based on the primary language/framework, update `.pre-commit-config.yaml`:
 
 ## Step 4: Update GitHub PR Review Configuration
 
-Update `.github/claude-code-review.yml`:
+Claude reviews are **mention-based by default**: `.github/workflows/claude.yml`
+responds to `@claude` mentions in issues, PR comments, and reviews. It needs
+the `CLAUDE_CODE_OAUTH_TOKEN` secret (set up in Step 6).
+
+For optional fully-automated reviews, update `.github/claude-code-review.yml`:
 
 1. Ask if there are specific file paths to include/exclude from reviews
 2. Add any language-specific review criteria to `file_type_instructions`
@@ -112,9 +116,28 @@ If the test run shows errors, help fix them before proceeding.
 
 Guide the user through GitHub integration:
 
-1. Explain they need to run `/install-github-app` to set up automated PR reviews
-2. Verify `.github/claude-code-review.yml` is configured correctly
-3. Explain that Claude will now automatically review PRs based on the configuration
+1. Explain they need to run `/install-github-app` — it sets up the
+   `CLAUDE_CODE_OAUTH_TOKEN` secret used by `.github/workflows/claude.yml`
+2. Explain that reviews are requested by mentioning `@claude` in issues, PR
+   comments, or reviews (opt-in, not automatic)
+3. If they enabled auto-reviews, verify `.github/claude-code-review.yml` is
+   configured correctly
+
+## Step 6.5: Repository Governance & CI
+
+Walk through the governance files that ship with the template:
+
+1. **CODEOWNERS** (`.github/CODEOWNERS`): replace `@denhamparry` with the
+   user's GitHub handle or team
+2. **Pre-commit autoupdate** (`.github/workflows/pre-commit-autoupdate.yml`):
+   update the `assignees:` value to the user's handle
+3. **Auto-assign PRs** (`.github/workflows/auto-assign-prs.yml`): update the
+   hardcoded `denhamparry` assignee/reviewer to the user's handle
+4. **Scorecard** (`.github/workflows/scorecard.yml`): if the project is
+   private, offer to delete this file (it requires a public repo)
+5. **SECURITY.md**: confirm the supported-versions table fits the project
+6. **Branch protection**: after the first push to `main`, apply the rules in
+   `docs/setup.md` → Branch Protection (required check: `pre-commit`)
 
 ## Step 7: Custom Commands Review
 

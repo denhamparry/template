@@ -1,5 +1,9 @@
 # Continuous Integration Workflow
-# Customize this template for your project's specific needs
+# Customize this template for your project's build/test/lint jobs.
+# Pre-commit quality checks run separately in pre-commit.yml (the
+# required status check) — keep this file for project-specific CI.
+# Pin actions to SHA digests (with a version comment) — see the
+# examples below and existing workflows in this repo.
 
 name: CI
 
@@ -16,7 +20,7 @@ jobs:
   #   name: Lint
   #   runs-on: ubuntu-latest
   #   steps:
-  #     - uses: actions/checkout@v4
+  #     - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
   #     - name: Run linter
   #       run: |
   #         # Add your lint command here
@@ -30,7 +34,7 @@ jobs:
   #   name: Test
   #   runs-on: ubuntu-latest
   #   steps:
-  #     - uses: actions/checkout@v4
+  #     - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
   #     - name: Run tests
   #       run: |
   #         # Add your test command here
@@ -44,7 +48,7 @@ jobs:
   #   name: Build
   #   runs-on: ubuntu-latest
   #   steps:
-  #     - uses: actions/checkout@v4
+  #     - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
   #     - name: Build project
   #       run: |
   #         # Add your build command here

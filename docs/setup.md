@@ -141,13 +141,47 @@ Perform a code review:
 
 ### GitHub Integration
 
-- [ ] Run `/install-github-app` in Claude Code for PR reviews
-- [ ] Create `.github/claude-code-review.yml`:
+- [ ] Run `/install-github-app` in Claude Code — this sets up the
+      `CLAUDE_CODE_OAUTH_TOKEN` secret used by `.github/workflows/claude.yml`
+- [ ] Request reviews by mentioning `@claude` in issues, PR comments, or
+      reviews (opt-in, mention-based — the recommended default)
+- [ ] (Optional) For fully automated reviews on every PR, customize
+      `.github/claude-code-review.yml`:
 
 ```yaml
 direct_prompt: |
   Review this PR for bugs and security issues.
   Be concise. Focus on actual problems.
+```
+
+### Branch Protection
+
+Apply after your first push to `main`. Convention: `pre-commit` is the
+**only** required status check — path-filtered workflows (Links) that don't
+fire on a given PR would stay "pending" forever and block merges.
+
+- [ ] Require the `pre-commit` status check to pass before merging
+- [ ] Require at least 1 approving review
+- [ ] Require branches to be up to date before merging
+- [ ] Block direct pushes to `main` (no bypass, no force pushes)
+
+Apply via the GitHub UI (Settings → Branches) or the CLI:
+
+```bash
+gh api --method PUT "repos/{owner}/{repo}/branches/main/protection" \
+  --input - << 'EOF'
+{
+  "required_status_checks": {
+    "strict": true,
+    "checks": [{ "context": "pre-commit" }]
+  },
+  "required_pull_request_reviews": { "required_approving_review_count": 1 },
+  "enforce_admins": true,
+  "restrictions": null,
+  "allow_force_pushes": false,
+  "allow_deletions": false
+}
+EOF
 ```
 
 ## 🔧 Advanced Configuration (Optional)
