@@ -27,7 +27,7 @@
             pkgs.nodejs
 
             # Standalone CLI tools (also available via pre-commit hooks)
-            pkgs.nodePackages.prettier
+            pkgs.prettier
             pkgs.markdownlint-cli
             pkgs.shellcheck
             pkgs.gitleaks

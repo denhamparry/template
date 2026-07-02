@@ -1,7 +1,7 @@
 # GitHub Issue #4: fix(nix): dev shell fails to evaluate — nodePackages removed from nixpkgs-unstable
 
 **Issue:** [#4](https://github.com/denhamparry/template/issues/4)
-**Status:** Reviewed (Approved)
+**Status:** Complete
 **Date:** 2026-07-02
 
 ## Problem Statement
@@ -145,12 +145,12 @@ code.
 
 ## Success Criteria
 
-- [ ] `flake.nix` references `pkgs.prettier` instead of
+- [x] `flake.nix` references `pkgs.prettier` instead of
   `pkgs.nodePackages.prettier`
-- [ ] `nix flake check` passes against current `nixpkgs-unstable`
-- [ ] `nix develop --command prettier --version` succeeds
-- [ ] No `flake.lock` committed (per issue #2 template decision)
-- [ ] Pre-commit hooks pass
+- [x] `nix flake check` passes against current `nixpkgs-unstable`
+- [x] `nix develop --command prettier --version` succeeds (prettier 3.8.3)
+- [x] No `flake.lock` committed (per issue #2 template decision)
+- [x] Pre-commit hooks pass
 
 ## Files Modified
 
