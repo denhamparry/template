@@ -22,8 +22,8 @@ see if the package is still available.
 - A freshly generated `flake.lock` pins nixpkgs revision `e8273b2`
   (2026-07-01), where the `nodePackages` attribute set has been removed.
 - Anyone creating a new project from this template gets a broken dev shell
-  immediately — the flake fails to evaluate, so `nix develop`, `direnv
-  allow`, and the advisory `nix.yml` CI workflow all fail.
+  immediately — the flake fails to evaluate, so `nix develop` and `direnv
+  allow` both fail.
 - Repos with an older committed `flake.lock` are unaffected until they
   update.
 
@@ -211,8 +211,9 @@ code.
 
 - When nixpkgs removes an attribute scope, prefer the top-level attribute
   the error message points to and verify on <https://search.nixos.org>.
-- The advisory `nix.yml` workflow runs on flake-file PRs, so CI gives a
-  second verification of this change.
+- Unlike the `~/.claude` config repo, this template has no advisory nix CI
+  workflow, so flake breakage only surfaces when a human runs `nix develop`
+  — local verification before commit is the only gate.
 
 ## Plan Review
 
@@ -277,9 +278,11 @@ code.
 1. **Risk 1:** Future upstream attribute removals will break the template
    the same way, since no lock is committed.
    - **Likelihood:** Medium (nixpkgs-unstable churns)
-   - **Impact:** Low (advisory `nix.yml` CI surfaces it early)
-   - **Mitigation:** Accepted trade-off per issue #2; the weekly/advisory
-     CI catches it. Not a blocker for this fix.
+   - **Impact:** Medium (this repo has no nix CI workflow, so breakage
+     surfaces only when someone enters the dev shell)
+   - **Mitigation:** Accepted trade-off per issue #2. An advisory
+     `nix flake check` workflow would catch this earlier — noted as a
+     follow-up idea, not a blocker for this fix.
 
 ### Required Changes
 
