@@ -363,6 +363,9 @@ pre-commit hooks (check-yaml, markdownlint, prettier, gitleaks).
 21. `CLAUDE.md` - Contents list + footer refresh
 22. `README.md` - Feature overview refresh
 23. `.lycheeignore` - New: exclude template placeholder URLs (review finding)
+24. `CODE_OF_CONDUCT.md` - New: Contributor Covenant 2.1 (code-review
+    finding — `CONTRIBUTING.md` linked to it but it didn't exist, which
+    would fail the new internal link check)
 
 ## Related Issues and Tasks
 
