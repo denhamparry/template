@@ -1,7 +1,7 @@
 # GitHub Issue #4: fix(nix): dev shell fails to evaluate — nodePackages removed from nixpkgs-unstable
 
 **Issue:** [#4](https://github.com/denhamparry/template/issues/4)
-**Status:** Planning
+**Status:** Reviewed (Approved)
 **Date:** 2026-07-02
 
 ## Problem Statement
@@ -213,3 +213,95 @@ code.
   the error message points to and verify on <https://search.nixos.org>.
 - The advisory `nix.yml` workflow runs on flake-file PRs, so CI gives a
   second verification of this change.
+
+## Plan Review
+
+**Reviewer:** Claude Code (workflow-research-plan)
+**Review Date:** 2026-07-02
+**Original Plan Date:** 2026-07-02
+
+### Review Summary
+
+- **Overall Assessment:** Approved
+- **Confidence Level:** High
+- **Recommendation:** Proceed to implementation
+
+### Strengths
+
+- Root cause independently confirmed: evaluating
+  `nodePackages.prettier` against the pinned revision
+  `e8273b29fe1390ec8d4603f2477357555291432e` (the `e8273b2` from the issue)
+  hits the nixpkgs alias-removal path exactly as the issue describes.
+- Fix independently confirmed: `prettier` evaluates at top level in that
+  same revision (`prettier.version` → `3.8.3`) under
+  `legacyPackages.aarch64-darwin`, so the package is available on this
+  platform.
+- The plan correctly identifies `flake.nix:30` as the **only**
+  `nodePackages` reference in the repo (verified with `rg`).
+- The claim that all other dev shell packages are unaffected was verified:
+  `pre-commit`, `nodejs`, `markdownlint-cli`, `shellcheck`, `gitleaks`, and
+  `gh` all evaluate in the pinned revision.
+- The no-committed-`flake.lock` decision is correctly sourced from the
+  issue #2 plan rather than assumed, and the plan explicitly guards against
+  accidentally committing the transient lock generated during verification.
+- Scope is exactly right: one line, no drive-by changes.
+
+### Gaps Identified
+
+1. **Gap 1:** `nix flake check` may not exercise the devShell output on all
+   nix versions unless `--all-systems` semantics apply; devShells are
+   checked for the current system, which is sufficient here.
+   - **Impact:** Low
+   - **Recommendation:** Keep both verification commands (`nix flake check`
+     and `nix develop --command prettier --version`) as planned — the
+     `nix develop` invocation is the authoritative proof.
+
+### Edge Cases Not Covered
+
+1. **Edge Case 1:** A consumer with an old cached `flake.lock` in an
+   existing project won't see this fix until they update their lock.
+   - **Current Plan:** Notes this in the problem statement (older locks are
+     unaffected until updated); no action needed in the template.
+   - **Recommendation:** None — out of the template's control.
+
+### Alternatives Assessed During Review
+
+1. **Commit a pinned `flake.lock`:** already considered and correctly
+   rejected in the plan — it reverses the documented issue #2 decision and
+   goes stale in a template.
+2. **Pin nixpkgs to a stable release branch:** correctly rejected as
+   out-of-scope for a one-line bug fix and against fleet convention.
+
+### Risks and Concerns
+
+1. **Risk 1:** Future upstream attribute removals will break the template
+   the same way, since no lock is committed.
+   - **Likelihood:** Medium (nixpkgs-unstable churns)
+   - **Impact:** Low (advisory `nix.yml` CI surfaces it early)
+   - **Mitigation:** Accepted trade-off per issue #2; the weekly/advisory
+     CI catches it. Not a blocker for this fix.
+
+### Required Changes
+
+None — the plan can be implemented as written.
+
+### Optional Improvements
+
+- [ ] Apply the same fix to the `~/.claude` config repo's `flake.nix`
+  (separate repository, noted in the issue) — track as a follow-up outside
+  this PR.
+
+### Verification Checklist
+
+- [x] Solution addresses root cause identified in GitHub issue
+- [x] All acceptance criteria from issue are covered
+- [x] Implementation steps are specific and actionable
+- [x] File paths and code references are accurate
+- [x] Security implications considered and addressed (none — nix package
+  reference only)
+- [x] Performance impact assessed (none)
+- [x] Test strategy covers critical paths and edge cases
+- [x] Documentation updates planned (none needed — no docs reference
+  `nodePackages`)
+- [x] Related issues/dependencies identified (issue #2 lock decision)
+- [x] Breaking changes documented (none)
