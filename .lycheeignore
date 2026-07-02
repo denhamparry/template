@@ -1,0 +1,5 @@
+# Template placeholder URLs — intentionally non-resolvable until customised.
+# One regex per line; read automatically by lychee (links.yml workflow).
+https://github\.com/YOUR_USERNAME/.*
+https://github\.com/your-username/.*
+https://github\.com/\[OWNER\]/.*

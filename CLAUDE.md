@@ -24,15 +24,28 @@ Alternatively, you can manually follow the setup checklist in `docs/setup.md`.
 ### Template Contents
 
 - `README.md` - Template overview and quick start guide
-- `docs/setup.md` - Comprehensive Claude Code setup checklist
+- `docs/setup.md` - Comprehensive Claude Code setup checklist (including
+  branch protection)
 - `CLAUDE.md` - This file (customize for your project)
+- `AGENTS.md` - Symlink to CLAUDE.md (Codex CLI portability)
+- `SECURITY.md` - Vulnerability disclosure policy
 - `.claude/commands/` - Custom slash commands for workflows
   - `setup-repo.md` - **Interactive setup wizard (start here!)**
   - `review.md` - Comprehensive code review workflow
   - `tdd-check.md` - TDD compliance verification
   - `precommit.md` - Pre-commit hooks runner
-- `.github/claude-code-review.yml` - Automated PR review configuration
+- `.github/workflows/` - CI workflows (all actions SHA-pinned)
+  - `pre-commit.yml` - Runs all quality hooks (**the required status check**)
+  - `ci.yml` - Placeholder for project build/test/lint jobs
+  - `claude.yml` - Opt-in `@claude` mention-based AI assistance
+  - `auto-assign-prs.yml` - Assigns and requests review on new PRs
+  - `pre-commit-autoupdate.yml` - Weekly hook version updates
+  - `links.yml` - Markdown link checking (internal on PR, external weekly)
+  - `scorecard.yml` - OpenSSF Scorecard (public repos; delete if private)
+- `.github/CODEOWNERS` - Default reviewers (customize the handle)
+- `.github/claude-code-review.yml` - Optional automated PR review configuration
 - `.pre-commit-config.yaml` - Code quality hooks configuration
+- `flake.nix` / `.envrc` - Opt-in reproducible dev shell (nix + direnv)
 
 ## Development Philosophy
 
@@ -78,10 +91,12 @@ When creating a new project from this template:
 - [ ] List Known Issues/Gotchas
 - [ ] Add Dependencies Notes
 - [ ] Customize `.pre-commit-config.yaml` for your language (uncomment relevant hooks)
-- [ ] Update `.github/claude-code-review.yml` with project-specific review criteria
+- [ ] Replace `@denhamparry` in `.github/CODEOWNERS`, `auto-assign-prs.yml`, and `pre-commit-autoupdate.yml` with your handle
+- [ ] Delete `.github/workflows/scorecard.yml` if your project is private
 - [ ] Modify or add custom slash commands in `.claude/commands/` as needed
 - [ ] Install and configure pre-commit: `pip install pre-commit && pre-commit install`
-- [ ] Set up GitHub App for PR reviews: run `/install-github-app` in Claude Code
+- [ ] Set up the GitHub App: run `/install-github-app` in Claude Code (enables `@claude` mentions)
+- [ ] Apply branch protection after first push (see `docs/setup.md` → Branch Protection)
 
 ## Quick Commands (Template Defaults)
 
@@ -146,15 +161,20 @@ Customize `.pre-commit-config.yaml` for your language-specific needs (Python, Go
 
 ## GitHub Integration
 
-This template includes `.github/claude-code-review.yml` for automated PR reviews.
+Claude reviews are **opt-in and mention-based** via
+`.github/workflows/claude.yml`: mention `@claude` in an issue, PR comment, or
+review to request help. This matches the convention used across denhamparry
+repositories.
 
 **Setup:**
 
-1. Run `/install-github-app` in Claude Code session
-2. Customize review criteria in `.github/claude-code-review.yml`
-3. Claude will automatically review PRs based on configured rules
+1. Run `/install-github-app` in a Claude Code session — this configures the
+   `CLAUDE_CODE_OAUTH_TOKEN` secret used by `claude.yml`
+2. Mention `@claude` wherever you want a review or triage
+3. (Optional) For automatic reviews on every PR, customize
+   `.github/claude-code-review.yml`
 
-The default configuration checks for:
+Review requests typically check for:
 
 - Code quality and style compliance
 - TDD compliance (tests written first)
@@ -172,6 +192,6 @@ The default configuration checks for:
 
 ---
 
-**Template Version:** 1.0
-**Last Updated:** 2025-10-02
-**Maintained By:** [Your Name/Team]
+**Template Version:** 1.1
+**Last Updated:** 2026-07-02
+**Maintained By:** Lewis Denham-Parry

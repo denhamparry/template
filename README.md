@@ -50,9 +50,23 @@ git commit -m "chore: configure Claude Code for project"
 ### Core Configuration
 
 - **`CLAUDE.md`** - Project context for Claude Code with TDD guidelines
-- **`docs/setup.md`** - Comprehensive setup checklist and best practices
+  (`AGENTS.md` symlink included for Codex CLI portability)
+- **`docs/setup.md`** - Comprehensive setup checklist, best practices, and
+  branch protection guide
 - **`.pre-commit-config.yaml`** - Code quality hooks (formatting, linting, security)
-- **`.github/claude-code-review.yml`** - Automated PR review configuration
+- **`SECURITY.md`** - Vulnerability disclosure policy
+- **`.github/CODEOWNERS`** - Default reviewers for every PR
+- **`flake.nix` / `.envrc`** - Opt-in reproducible dev shell (nix + direnv)
+
+### CI Workflows (SHA-pinned actions)
+
+- **`pre-commit.yml`** - Runs all quality hooks; the required status check
+- **`ci.yml`** - Placeholder for your build/test/lint jobs
+- **`claude.yml`** - Opt-in `@claude` mention-based reviews and triage
+- **`auto-assign-prs.yml`** - Auto-assigns and requests review on new PRs
+- **`pre-commit-autoupdate.yml`** - Weekly hook version update PRs
+- **`links.yml`** - Markdown link checking (internal on PRs, external weekly)
+- **`scorecard.yml`** - OpenSSF Scorecard security posture (public repos)
 
 ### Custom Slash Commands
 
@@ -77,16 +91,16 @@ Use `/tdd-check` to verify you're following TDD principles.
 
 ### Automated Code Quality
 
-- Pre-commit hooks for consistent formatting and linting
+- Pre-commit hooks for consistent formatting and linting, enforced in CI
 - Secret detection to prevent credential leaks
 - Language-specific quality checks (Python, Go, JavaScript/TypeScript)
-- Automated PR reviews with Claude Code
+- On-demand PR reviews with Claude Code (`@claude` mentions)
 
 ### Claude Code Optimized
 
 - Project-specific context in CLAUDE.md
 - Custom slash commands for common workflows
-- Automated PR reviews configured out of the box
+- `@claude` mention-based PR reviews configured out of the box
 - Best practices built into the template
 
 ## 🛠️ Supported Languages
@@ -133,7 +147,7 @@ For issues with:
 
 ---
 
-**Template Version:** 1.0
-**Last Updated:** 2025-10-02
+**Template Version:** 1.1
+**Last Updated:** 2026-07-02
 
 Built with ❤️ for Claude Code development
