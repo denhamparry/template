@@ -25,14 +25,14 @@ repos:
 
   # Secret detection
   - repo: https://github.com/zricethezav/gitleaks
-    rev: v8.28.0
+    rev: v8.30.0
     hooks:
       - id: gitleaks
         name: Detect secrets with gitleaks
 
   # Markdown linting
   - repo: https://github.com/DavidAnson/markdownlint-cli2
-    rev: v0.17.1
+    rev: v0.23.0
     hooks:
       - id: markdownlint-cli2
         name: Lint Markdown files
