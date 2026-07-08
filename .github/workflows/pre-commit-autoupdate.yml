@@ -2,11 +2,9 @@
 # Dependabot doesn't support pre-commit natively, so this workflow
 # runs `pre-commit autoupdate` and creates a PR if versions changed.
 #
-# Token strategy: The default GITHUB_TOKEN creates PRs that won't trigger
-# other workflows (GitHub's anti-recursion measure). This means the pre-commit
-# CI check won't run automatically on autoupdate PRs. Options:
-#   1. Use GITHUB_TOKEN (default) — manually trigger CI by closing/reopening the PR
-#   2. Use a GitHub App token (PAT_TOKEN secret) — PRs trigger CI automatically
+# Token strategy: use PAT_TOKEN, a fine-grained PAT or GitHub App installation
+# token with contents:write and pull-requests:write. PRs created with this
+# token trigger the required pre-commit CI check automatically.
 name: Pre-commit autoupdate
 
 on:
@@ -59,10 +57,21 @@ jobs:
           pre-commit run --all-files || echo "::warning::Updated hooks have
           failures — PR will need manual fixes"
 
+      - name: Confirm PAT_TOKEN is configured
+        if: steps.changes.outputs.updated == 'true'
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          if [ -z "$PAT_TOKEN" ]; then
+            echo "::error::PAT_TOKEN secret is required to create the autoupdate PR"
+            exit 1
+          fi
+
       - name: Create pull request
         if: steps.changes.outputs.updated == 'true'
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
+          token: ${{ secrets.PAT_TOKEN }}
           branch: chore/pre-commit-autoupdate
           title: "chore(hooks): update pre-commit hook versions"
           body: |
@@ -70,9 +79,6 @@ jobs:
 
             Run `pre-commit autoupdate` to update hook versions in
             `.pre-commit-config.yaml`.
-
-            **Note:** If the pre-commit CI check doesn't trigger automatically,
-            close and reopen this PR to start it.
           commit-message: "chore(hooks): update pre-commit hook versions"
           labels: housekeeping
           # Customise the assignee for your project
