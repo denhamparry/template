@@ -151,6 +151,10 @@ Perform a code review:
 
 - [ ] Run `/install-github-app` in Claude Code — this sets up the
       `CLAUDE_CODE_OAUTH_TOKEN` secret used by `.github/workflows/claude.yml`
+- [ ] Provision a `PAT_TOKEN` repository secret for
+      `.github/workflows/pre-commit-autoupdate.yml`, or delete that workflow if
+      weekly hook updates are not wanted. Use a fine-grained PAT or GitHub App
+      installation token with `contents: write` and `pull-requests: write`.
 - [ ] Request reviews by mentioning `@claude` in issues, PR comments, or
       reviews (opt-in, mention-based — the recommended default)
 - [ ] (Optional) For fully automated reviews on every PR, customize
@@ -161,6 +165,14 @@ direct_prompt: |
   Review this PR for bugs and security issues.
   Be concise. Focus on actual problems.
 ```
+
+The pre-commit autoupdate workflow intentionally fails when hook updates are
+found but `PAT_TOKEN` is missing. Keep this hard failure so a template-derived
+repository gets an actionable setup error instead of silently skipping hook
+updates. The workflow uses `PAT_TOKEN` instead of the default `GITHUB_TOKEN`
+because repository or organization settings can block GitHub Actions from
+creating pull requests with `GITHUB_TOKEN`, and pull requests opened by
+`GITHUB_TOKEN` do not trigger the required `pre-commit` check.
 
 ### Branch Protection
 
