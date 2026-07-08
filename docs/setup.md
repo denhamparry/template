@@ -108,6 +108,14 @@
 - [ ] Install pre-commit hooks: `pip install pre-commit` or `npm install husky`
 - [ ] Create `.pre-commit-config.yaml` or husky configuration
 
+### Nix Dev Shell
+
+This template commits `flake.lock` intentionally. Keeping the lock in the
+tracked source gives reproducible dev-shell inputs and prevents nix-direnv from
+reloading on every prompt because a generated lock file changed mtime. After
+creating a project from the template, run `nix flake update` when you want to
+refresh the pinned inputs.
+
 ## 🎯 Workflow Setup
 
 ### Planning Documents
