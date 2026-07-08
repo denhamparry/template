@@ -4,8 +4,5 @@
 # Nix / direnv
 .direnv/
 result
-# No committed lock — first `nix develop` generates it per-project (see
-# docs/plan/issues/2_align_template_with_fleet_conventions.md). Ignoring it
-# also stops Nix auto-staging the generated lock, which breaks
-# `git pull` autostash. To pin one anyway: git add -f flake.lock
-flake.lock
+# Keep flake.lock committed for reproducible dev shells and stable nix-direnv
+# caching. Template consumers can refresh pins with `nix flake update`.
