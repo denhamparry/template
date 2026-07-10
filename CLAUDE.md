@@ -37,7 +37,6 @@ Alternatively, you can manually follow the setup checklist in `docs/setup.md`.
 - `.github/workflows/` - CI workflows (all actions SHA-pinned)
   - `pre-commit.yml` - Runs all quality hooks (**the required status check**)
   - `ci.yml` - Placeholder for project build/test/lint jobs
-  - `claude.yml` - Opt-in `@claude` mention-based AI assistance
   - `auto-assign-prs.yml` - Assigns and requests review on new PRs
   - `pre-commit-autoupdate.yml` - Weekly hook version updates
   - `links.yml` - Markdown link checking (internal on PR, external weekly)
@@ -96,7 +95,9 @@ When creating a new project from this template:
 - [ ] Delete `.github/workflows/scorecard.yml` if your project is private
 - [ ] Modify or add custom slash commands in `.claude/commands/` as needed
 - [ ] Install and configure pre-commit: `pip install pre-commit && pre-commit install`
-- [ ] Set up the GitHub App: run `/install-github-app` in Claude Code (enables `@claude` mentions)
+- [ ] If `@claude` mentions are wanted, add the current Claude Code workflow
+      and run `/install-github-app` in Claude Code to provision its repository
+      secret
 - [ ] Apply branch protection after first push (see `docs/setup.md` → Branch Protection)
 
 ## Quick Commands (Template Defaults)
@@ -162,17 +163,20 @@ Customize `.pre-commit-config.yaml` for your language-specific needs (Python, Go
 
 ## GitHub Integration
 
-Claude reviews are **opt-in and mention-based** via
-`.github/workflows/claude.yml`: mention `@claude` in an issue, PR comment, or
-review to request help. This matches the convention used across denhamparry
-repositories.
+Claude reviews are optional and mention-based. Add the current Claude Code
+GitHub Actions workflow only in repositories where `@claude` reviews are
+wanted, then mention `@claude` in an issue, PR comment, or review to request
+help. This avoids copying an active workflow before its repository secret has
+been provisioned.
 
 **Setup:**
 
-1. Run `/install-github-app` in a Claude Code session — this configures the
-   `CLAUDE_CODE_OAUTH_TOKEN` secret used by `claude.yml`
-2. Mention `@claude` wherever you want a review or triage
-3. (Optional) For automatic reviews on every PR, customize
+1. Add the current Claude Code GitHub Actions workflow from the official Claude
+   Code setup flow or documentation.
+2. Run `/install-github-app` in a Claude Code session — this configures the
+   workflow's repository secret.
+3. Mention `@claude` wherever you want a review or triage.
+4. (Optional) For automatic reviews on every PR, customize
    `.github/claude-code-review.yml`
 
 Review requests typically check for:
