@@ -62,7 +62,6 @@ git commit -m "chore: configure Claude Code for project"
 
 - **`pre-commit.yml`** - Runs all quality hooks; the required status check
 - **`ci.yml`** - Placeholder for your build/test/lint jobs
-- **`claude.yml`** - Opt-in `@claude` mention-based reviews and triage
 - **`auto-assign-prs.yml`** - Auto-assigns and requests review on new PRs
 - **`pre-commit-autoupdate.yml`** - Weekly hook version update PRs
 - **`links.yml`** - Markdown link checking (internal on PRs, external weekly)
@@ -94,13 +93,14 @@ Use `/tdd-check` to verify you're following TDD principles.
 - Pre-commit hooks for consistent formatting and linting, enforced in CI
 - Secret detection to prevent credential leaks
 - Language-specific quality checks (Python, Go, JavaScript/TypeScript)
-- On-demand PR reviews with Claude Code (`@claude` mentions)
+- Guidance for adding on-demand PR reviews with Claude Code (`@claude`
+  mentions)
 
 ### Claude Code Optimized
 
 - Project-specific context in CLAUDE.md
 - Custom slash commands for common workflows
-- `@claude` mention-based PR reviews configured out of the box
+- Optional `@claude` mention-based PR reviews after GitHub App setup
 - Best practices built into the template
 
 ## 🛠️ Supported Languages

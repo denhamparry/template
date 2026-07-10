@@ -149,8 +149,9 @@ Perform a code review:
 
 ### GitHub Integration
 
-- [ ] Run `/install-github-app` in Claude Code — this sets up the
-      `CLAUDE_CODE_OAUTH_TOKEN` secret used by `.github/workflows/claude.yml`
+- [ ] If `@claude` mention-based reviews are wanted, add the current Claude
+      Code GitHub Actions workflow and run `/install-github-app` in Claude Code
+      to provision its repository secret
 - [ ] Provision a `PAT_TOKEN` repository secret for
       `.github/workflows/pre-commit-autoupdate.yml`, or delete that workflow if
       weekly hook updates are not wanted. Use a fine-grained PAT or GitHub App
