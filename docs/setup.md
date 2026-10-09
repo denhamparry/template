@@ -152,10 +152,13 @@ Perform a code review:
 - [ ] If `@claude` mention-based reviews are wanted, add the current Claude
       Code GitHub Actions workflow and run `/install-github-app` in Claude Code
       to provision its repository secret
-- [ ] Provision a `PAT_TOKEN` repository secret for
+- [ ] Provision GitHub App credentials for
       `.github/workflows/pre-commit-autoupdate.yml`, or delete that workflow if
-      weekly hook updates are not wanted. Use a fine-grained PAT or GitHub App
-      installation token with `contents: write` and `pull-requests: write`.
+      weekly hook updates are not wanted. Install a GitHub App on the
+      repository with **Contents: Read and write** and **Pull requests: Read
+      and write**, then set its Client ID as an `APP_CLIENT_ID` Actions
+      variable and its private key as an `APP_PRIVATE_KEY` secret, together
+      (commands below).
 - [ ] Request reviews by mentioning `@claude` in issues, PR comments, or
       reviews (opt-in, mention-based — the recommended default)
 - [ ] (Optional) For fully automated reviews on every PR, customize
@@ -167,12 +170,27 @@ direct_prompt: |
   Be concise. Focus on actual problems.
 ```
 
-The pre-commit autoupdate workflow intentionally fails when hook updates are
-found but `PAT_TOKEN` is missing. Keep this hard failure so a template-derived
-repository gets an actionable setup error instead of silently skipping hook
-updates. The workflow uses `PAT_TOKEN` instead of the default `GITHUB_TOKEN`
-because repository or organization settings can block GitHub Actions from
-creating pull requests with `GITHUB_TOKEN`, and pull requests opened by
+Set both App credentials together, then delete the downloaded key file:
+
+```bash
+gh variable set APP_CLIENT_ID --body '<client-id>'
+gh secret set APP_PRIVATE_KEY < <app-name>.private-key.pem
+rm <app-name>.private-key.pem
+```
+
+The pre-commit autoupdate workflow prefers a short-lived App installation token
+scoped to the current repository. It derives the repository name from
+`GITHUB_REPOSITORY` rather than the event payload, which may be empty on
+scheduled runs. A `PAT_TOKEN` secret (fine-grained PAT with `contents: write`
+and `pull-requests: write`) is a legacy fallback used only while neither
+`APP_CLIENT_ID` nor `APP_PRIVATE_KEY` is configured.
+
+When hook updates are found, the workflow intentionally fails if only one App
+field is configured, or if neither App credentials nor `PAT_TOKEN` exist. Keep
+these hard failures so a template-derived repository gets an actionable setup
+error instead of silently skipping hook updates. The workflow does not use the
+default `GITHUB_TOKEN` because repository or organization settings can block
+GitHub Actions from creating pull requests with it, and pull requests opened by
 `GITHUB_TOKEN` do not trigger the required `pre-commit` check.
 
 ### Branch Protection

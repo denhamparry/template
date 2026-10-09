@@ -2,9 +2,11 @@
 # Dependabot doesn't support pre-commit natively, so this workflow
 # runs `pre-commit autoupdate` and creates a PR if versions changed.
 #
-# Token strategy: use PAT_TOKEN, a fine-grained PAT or GitHub App installation
-# token with contents:write and pull-requests:write. PRs created with this
-# token trigger the required pre-commit CI check automatically.
+# Token strategy: prefer a GitHub App installation token from the
+# APP_CLIENT_ID Actions variable and APP_PRIVATE_KEY secret, scoped to this
+# repository with contents:write and pull-requests:write. A PAT_TOKEN secret
+# is a legacy fallback used only while neither App field is configured.
+# App/PAT-authenticated PRs trigger the required pre-commit CI check.
 name: Pre-commit autoupdate
 
 on:
@@ -57,13 +59,58 @@ jobs:
           pre-commit run --all-files || echo "::warning::Updated hooks have
           failures — PR will need manual fixes"
 
-      - name: Confirm PAT_TOKEN is configured
+      - name: Select autoupdate credential
         if: steps.changes.outputs.updated == 'true'
+        id: credentials
         env:
+          APP_CLIENT_ID: ${{ vars.APP_CLIENT_ID }}
+          APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
           PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          if [ -z "$PAT_TOKEN" ]; then
-            echo "::error::PAT_TOKEN secret is required to create the autoupdate PR"
+          if [ -n "$APP_CLIENT_ID" ] || [ -n "$APP_PRIVATE_KEY" ]; then
+            if [ -z "$APP_CLIENT_ID" ] || [ -z "$APP_PRIVATE_KEY" ]; then
+              echo "::error::Configure both APP_CLIENT_ID variable and APP_PRIVATE_KEY secret"
+              exit 1
+            fi
+            echo "mode=app" >> "$GITHUB_OUTPUT"
+          elif [ -n "$PAT_TOKEN" ]; then
+            echo "::warning::Using legacy PAT_TOKEN; configure APP_CLIENT_ID and APP_PRIVATE_KEY to use a GitHub App"
+            echo "mode=pat" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::Configure App credentials before retiring PAT_TOKEN"
+            exit 1
+          fi
+
+      - name: Resolve App token repository
+        if: steps.changes.outputs.updated == 'true' && steps.credentials.outputs.mode == 'app'
+        id: app-repository
+        run: |
+          if [[ ! "${GITHUB_REPOSITORY:-}" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
+            echo "::error::GITHUB_REPOSITORY must contain a nonempty owner/repository pair"
+            exit 1
+          fi
+          repository_name="${GITHUB_REPOSITORY#*/}"
+          echo "name=$repository_name" >> "$GITHUB_OUTPUT"
+
+      - name: Generate GitHub App token
+        if: steps.changes.outputs.updated == 'true' && steps.credentials.outputs.mode == 'app'
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ steps.app-repository.outputs.name }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Assert App token is present
+        if: steps.changes.outputs.updated == 'true' && steps.credentials.outputs.mode == 'app'
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          if [ -z "$APP_TOKEN" ]; then
+            echo "::error::App installation token is empty"
             exit 1
           fi
 
@@ -71,7 +118,7 @@ jobs:
         if: steps.changes.outputs.updated == 'true'
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
-          token: ${{ secrets.PAT_TOKEN }}
+          token: ${{ steps.credentials.outputs.mode == 'app' && steps.app-token.outputs.token || secrets.PAT_TOKEN }}
           branch: chore/pre-commit-autoupdate
           title: "chore(hooks): update pre-commit hook versions"
           body: |
