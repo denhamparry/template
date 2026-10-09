@@ -91,7 +91,7 @@ When creating a new project from this template:
 - [ ] Add Dependencies Notes
 - [ ] Customize `.pre-commit-config.yaml` for your language (uncomment relevant hooks)
 - [ ] Replace `@denhamparry` in `.github/CODEOWNERS`, `auto-assign-prs.yml`, and `pre-commit-autoupdate.yml` with your handle
-- [ ] Provision a `PAT_TOKEN` secret for the pre-commit autoupdate workflow (or delete the workflow if not wanted)
+- [ ] Provision GitHub App credentials for the pre-commit autoupdate workflow: an `APP_CLIENT_ID` Actions variable and an `APP_PRIVATE_KEY` secret (legacy `PAT_TOKEN` fallback; or delete the workflow if not wanted)
 - [ ] Delete `.github/workflows/scorecard.yml` if your project is private
 - [ ] Modify or add custom slash commands in `.claude/commands/` as needed
 - [ ] Install and configure pre-commit: `pip install pre-commit && pre-commit install`
