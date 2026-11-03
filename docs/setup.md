@@ -178,19 +178,17 @@ gh secret set APP_PRIVATE_KEY < <app-name>.private-key.pem
 rm <app-name>.private-key.pem
 ```
 
-The pre-commit autoupdate workflow prefers a short-lived App installation token
+The pre-commit autoupdate workflow uses a short-lived App installation token
 scoped to the current repository. It derives the repository name from
 `GITHUB_REPOSITORY` rather than the event payload, which may be empty on
-scheduled runs. A `PAT_TOKEN` secret (fine-grained PAT with `contents: write`
-and `pull-requests: write`) is a legacy fallback used only while neither
-`APP_CLIENT_ID` nor `APP_PRIVATE_KEY` is configured.
+scheduled runs. There is no personal access token fallback.
 
-When hook updates are found, the workflow intentionally fails if only one App
-field is configured, or if neither App credentials nor `PAT_TOKEN` exist. Keep
-these hard failures so a template-derived repository gets an actionable setup
-error instead of silently skipping hook updates. The workflow does not use the
-default `GITHUB_TOKEN` because repository or organization settings can block
-GitHub Actions from creating pull requests with it, and pull requests opened by
+When hook updates are found, the workflow intentionally fails unless both
+`APP_CLIENT_ID` and `APP_PRIVATE_KEY` are configured. Keep this hard failure so
+a template-derived repository gets an actionable setup error instead of
+silently skipping hook updates. The workflow does not use the default
+`GITHUB_TOKEN` because repository or organization settings can block GitHub
+Actions from creating pull requests with it, and pull requests opened by
 `GITHUB_TOKEN` do not trigger the required `pre-commit` check.
 
 ### Branch Protection
