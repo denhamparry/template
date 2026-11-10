@@ -3,3 +3,5 @@
 https://github\.com/YOUR_USERNAME/.*
 https://github\.com/your-username/.*
 https://github\.com/\[OWNER\]/.*
+# Private maintenance repository links return 404 to the unauthenticated checker.
+https://github\.com/denhamparry/maintenance/.*
