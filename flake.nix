@@ -15,7 +15,38 @@
     flake-utils.lib.eachDefaultSystem (
       system:
       let
-        pkgs = nixpkgs.legacyPackages.${system};
+        # TODO(#54): Remove when upstream pre-commit is available from
+        # cache.nixos.org on aarch64-darwin without source-built .NET inputs.
+        preCommitOverlay = _final: prev: {
+          pre-commit =
+            if
+              builtins.hasAttr "dotnetCorePackages" (
+                builtins.functionArgs (import "${nixpkgs.outPath}/pkgs/by-name/pr/pre-commit/package.nix")
+              )
+            then
+              (prev.pre-commit.override {
+                dotnetCorePackages = prev.dotnetCorePackages // {
+                  sdk_8_0-source = prev.dotnetCorePackages.sdk_8_0-source.overrideAttrs (old: {
+                    meta = old.meta // {
+                      platforms = [ ];
+                    };
+                  });
+                };
+              }).overridePythonAttrs
+                (_: {
+                  doCheck = false;
+                  doInstallCheck = false;
+                  # pytest-check-hook runs pytest even when doCheck is false.
+                  dontUsePytestCheck = true;
+                })
+            else
+              prev.pre-commit;
+        };
+
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [ preCommitOverlay ];
+        };
       in
       {
         devShells.default = pkgs.mkShell {
