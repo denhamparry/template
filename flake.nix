@@ -19,10 +19,11 @@
         # cache.nixos.org on aarch64-darwin without source-built .NET inputs.
         preCommitOverlay = _final: prev: {
           pre-commit =
-            if
-              builtins.hasAttr "dotnetCorePackages" (
-                builtins.functionArgs (import "${nixpkgs.outPath}/pkgs/by-name/pr/pre-commit/package.nix")
-              )
+            let
+              packagePath = "${nixpkgs.outPath}/pkgs/by-name/pr/pre-commit/package.nix";
+            in
+            if builtins.pathExists packagePath
+              && builtins.hasAttr "dotnetCorePackages" (builtins.functionArgs (import packagePath))
             then
               (prev.pre-commit.override {
                 dotnetCorePackages = prev.dotnetCorePackages // {
